@@ -1,20 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList} from 'react-native';
+import { SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import Contacts from 'react-native-contacts';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Дима сделал</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.body}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Контакты</Text>
+      </View>
+      <ContacatComponent/>
+    </SafeAreaView>
   );
 }
 
+const ContacatComponent = ({name, phoneNumber}) => {
+//   const callNumber = () => {
+//     Linking.openURL(tel:${phoneNumber});
+// };
+
+// const sendMessage = () => {
+//     Linking.openURL(sms:${phoneNumber});
+// };
+
+
+return(
+  <View style={styles.contact}>
+        <Text style={[styles.text]}> Имя контакта: {"\n"} {name}</Text>
+        <Text style={[styles.text]}> Номер контака: {"\n"} {phoneNumber}</Text>
+  </View>
+)
+}
+
 const styles = StyleSheet.create({
-  container: {
+  body: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fafafa",
   },
+  container: {
+    marginTop: "7%",
+    padding: "1%",
+    alignItems: "center",
+    justifyContent: 'flex-start',
+  },
+  title: {
+    marginTop: "5%",
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: "#1B1B1B"
+ },
+ contact: {
+  marginTop: "5%",
+  backgroundColor: "#E1E1E1",
+  padding: "3%"
+ },
+ text: {
+  fontSize: 16,
+  color: "#1B1B1B"
+ },
 });
