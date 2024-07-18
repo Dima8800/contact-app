@@ -1,34 +1,58 @@
 import { View, Text, Button, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Image} from 'react-native';
 import React, { useEffect, useState } from 'react';
-import Contacts from 'react-native-contacts';
+import { con } from 'react-native-contacts';
+import { PermissionsAndroid } from 'react-native';
 
 import phoneImage from './assets/phone.png';
 import messageImage from './assets/message.png';
 
-
-
 export default function App() {
   const [contacts, setContacts] = useState([]);
+  useState(() => {
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
+        title: 'Contacts',
+        message: 'This app would like to view your contacts.',
+        buttonPositive: 'Please accept bare mortal',
+    })
+    .then((res) => {
+        console.log('Permission: ', res);
+        
+        con.getAll()
+            .then((contacts) => {
+                // work with contacts
+                setContacts(contacts);
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+    })
+    .catch((error) => {
+        console.error('Permission error: ', error);
+    });
+}, []);
+
+  console.log(contacts)
 
   return (
     <SafeAreaView style={styles.body}>
       <View style={styles.container}>
         <Text style={styles.title}>Контакты</Text>
       </View>
-      <ContacatComponent name={"Дмитрий"} phoneNumber={"+79220000000"}/>
-      <ContacatComponent name={"Горелов Дмитрий Алекснадрпович"} phoneNumber={"+79220000000"}/>
+      {contacts.map((contact, index) => (
+        <ContactComponent key={index} name={contact.displayName} phoneNumber={contact.phoneNumbers[0].number} />
+      ))}
     </SafeAreaView>
   );
 }
 
-const ContacatComponent = ({name, phoneNumber}) => {
+const ContactComponent = ({name, phoneNumber}) => {
 return(
   <View style={styles.contact}>
         <Text style={[styles.text, styles.name]}>{name}</Text>
         <View style={styles.contactInfo}>
         <Text style={[styles.text, styles.phone]}>{phoneNumber}</Text>
         <View style={styles.buttonContainer}>
-        <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={messageImage} />
+          <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={messageImage} />
           <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={phoneImage} />
         </View>
       </View>
