@@ -1,37 +1,29 @@
 import { View, Text, Button, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Image} from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { con } from 'react-native-contacts';
-import { PermissionsAndroid } from 'react-native';
+import * as Contacts from 'expo-contacts';
 
 import phoneImage from './assets/phone.png';
 import messageImage from './assets/message.png';
 
 export default function App() {
   const [contacts, setContacts] = useState([]);
-  useState(() => {
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-        title: 'Contacts',
-        message: 'This app would like to view your contacts.',
-        buttonPositive: 'Please accept bare mortal',
-    })
-    .then((res) => {
-        console.log('Permission: ', res);
-        
-        con.getAll()
-            .then((contacts) => {
-                // work with contacts
-                setContacts(contacts);
-            })
-            .catch((e) => {
-                console.log(e);
-            });
-    })
-    .catch((error) => {
-        console.error('Permission error: ', error);
-    });
-}, []);
+  
+  useEffect(() => {
+    (async () => {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status === 'granted') {
+        const { data } = await Contacts.getContactsAsync({
+          fields: [Contacts.Fields.Emails],
+        });
 
-  console.log(contacts)
+        if (data.length > 0) {
+          const contact = data[0];
+          setContacts(data)
+          console.log(contact);
+        }
+      }
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={styles.body}>
@@ -39,8 +31,8 @@ export default function App() {
         <Text style={styles.title}>Контакты</Text>
       </View>
       {contacts.map((contact, index) => (
-        <ContactComponent key={index} name={contact.displayName} phoneNumber={contact.phoneNumbers[0].number} />
-      ))}
+  <ContactComponent key={index} name={contact.displayName} phoneNumber={contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].number : 'Номер телефона не найден'} />
+))}
     </SafeAreaView>
   );
 }

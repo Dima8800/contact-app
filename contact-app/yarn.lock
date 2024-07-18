@@ -3425,6 +3425,11 @@ expo-constants@~16.0.0:
     "@expo/config" "~9.0.0"
     "@expo/env" "~0.3.0"
 
+expo-contacts@^13.0.4:
+  version "13.0.4"
+  resolved "https://registry.npmjs.org/expo-contacts/-/expo-contacts-13.0.4.tgz"
+  integrity sha512-H1hnNrfjIHAXb2uedNKa7tAlt3s85LS4JVw1t/NRYPIgno7ijtp476kvuliufbdWHYivtHJ5vJ1zkoDDftPMZw==
+
 expo-file-system@~17.0.1:
   version "17.0.1"
   resolved "https://registry.npmjs.org/expo-file-system/-/expo-file-system-17.0.1.tgz"
