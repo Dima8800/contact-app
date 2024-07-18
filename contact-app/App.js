@@ -1,9 +1,11 @@
-import { View, Text, Button, StyleSheet, FlatList} from 'react-native';
-import { SafeAreaView } from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList, SafeAreaView} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Contacts from 'react-native-contacts';
 
+
 export default function App() {
+  const [contacts, setContacts] = useState([]);
+
   return (
     <SafeAreaView style={styles.body}>
       <View style={styles.container}>
@@ -15,21 +17,12 @@ export default function App() {
 }
 
 const ContacatComponent = ({name, phoneNumber}) => {
-//   const callNumber = () => {
-//     Linking.openURL(tel:${phoneNumber});
-// };
-
-// const sendMessage = () => {
-//     Linking.openURL(sms:${phoneNumber});
-// };
-
-
 return(
   <View style={styles.contact}>
         <Text style={[styles.text]}> Имя контакта: {"\n"} {name}</Text>
         <Text style={[styles.text]}> Номер контака: {"\n"} {phoneNumber}</Text>
   </View>
-)
+);
 }
 
 const styles = StyleSheet.create({
