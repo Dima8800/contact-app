@@ -12,10 +12,7 @@ export default function App() {
     (async () => {
       const { status } = await Contacts.requestPermissionsAsync();
       if (status === 'granted') {
-        const { data } = await Contacts.getContactsAsync({
-          fields: [Contacts.Fields.Emails],
-        });
-
+        const { data } = await Contacts.getContactsAsync({});
         if (data.length > 0) {
           const contact = data[0];
           setContacts(data)
@@ -25,31 +22,43 @@ export default function App() {
     })();
   }, []);
 
+  const renderContact = ({ item }) => (
+    <ContactComponent contacts={item} />
+  );
+
   return (
     <SafeAreaView style={styles.body}>
       <View style={styles.container}>
         <Text style={styles.title}>Контакты</Text>
       </View>
-      {contacts.map((contact, index) => (
-  <ContactComponent key={index} name={contact.displayName} phoneNumber={contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].number : 'Номер телефона не найден'} />
-))}
+      <FlatList
+        data={contacts}
+        renderItem={renderContact}
+        keyExtractor={(item, index) => index.toString()}
+      />
     </SafeAreaView>
   );
 }
 
-const ContactComponent = ({name, phoneNumber}) => {
-return(
-  <View style={styles.contact}>
-        <Text style={[styles.text, styles.name]}>{name}</Text>
-        <View style={styles.contactInfo}>
-        <Text style={[styles.text, styles.phone]}>{phoneNumber}</Text>
-        <View style={styles.buttonContainer}>
-          <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={messageImage} />
-          <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={phoneImage} />
-        </View>
+const ContactComponent = ({contacts}) => {
+  return (
+    <View style={styles.contact}>
+      <Text style={[styles.text, styles.name]}> {contacts.name} </Text>
+      <View style={styles.contactInfo}>
+        {contacts.phoneNumbers && contacts.phoneNumbers.length > 0 ? (
+          <Text style={[styles.text, styles.phone]}> {contacts.phoneNumbers[0].number} </Text>
+        ) : (
+          <Text style={[styles.text, styles.phone]}> Номер телефона отсутствует </Text>
+        )}
+        {contacts.phoneNumbers && contacts.phoneNumbers.length > 0 && (
+          <View style={styles.buttonContainer}>
+            <CustomButton onPress={() => console.log("Button 1 pressed")} imageSource={messageImage} />
+            <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={phoneImage} />
+          </View>
+        )}
       </View>
-  </View>
-);
+    </View>
+  );
 }
 
 const CustomButton = ({ onPress, imageSource }) => {
