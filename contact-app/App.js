@@ -4,10 +4,12 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import * as Contacts from 'expo-contacts';
 
 import SettingsScreen from './src/SettingsScreen';
+import messageScreen from './src/MessageScreen';
 
 import phoneImage from './assets/phone.png';
 import messageImage from './assets/message.png';
 import settingsImage from './assets/settings.png';
+import MessageScreen from './src/MessageScreen';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -77,23 +79,49 @@ const Header = ({}) => {
   );
 };
 
-const ContactComponent = ({contacts}) => {
+const ContactComponent = ({ contacts }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [messageText, setMessageText] = useState(''); // Состояние для хранения текста сообщения
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const handleOpenModal = () => {
+    toggleModal();
+  };
+
+  const handleSendMessage = (text) => {
+    console.log("Отправленное сообщение:", text); // Логируем отправленное сообщение
+    setMessageText(text); // Обновляем состояние с текстом сообщения
+    toggleModal(); // Закрываем модальное окно
+  };
+
   return (
     <View style={styles.contact}>
-      <Text style={[styles.text, styles.name]}> {contacts.name} </Text>
+      <Text style={[styles.text, styles.name]}>
+        {contacts?.name || 'Имя отсутствует'}
+      </Text>
       <View style={styles.contactInfo}>
-        {contacts.phoneNumbers && contacts.phoneNumbers.length > 0 ? (
-          <Text style={[styles.text, styles.phone]}> {contacts.phoneNumbers[0].number} </Text>
+        {contacts?.phoneNumbers?.length > 0 ? (
+          <Text style={[styles.text, styles.phone]}>
+            {contacts.phoneNumbers[0].number}
+          </Text>
         ) : (
-          <Text style={[styles.text, styles.phone]}> Номер телефона отсутствует </Text>
+          <Text style={[styles.text, styles.phone]}>Номер телефона отсутствует</Text>
         )}
-        {contacts.phoneNumbers && contacts.phoneNumbers.length > 0 && (
+        {contacts?.phoneNumbers?.length > 0 && (
           <View style={styles.buttonContainer}>
-            <CustomButton onPress={() => console.log("Button 1 pressed")} imageSource={messageImage} />
+            <CustomButton onPress={handleOpenModal} imageSource={messageImage} />
             <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={phoneImage} />
           </View>
         )}
       </View>
+      <MessageScreen 
+        visible={isModalVisible} 
+        onClose={() => setIsModalVisible(false)}
+        onSendMessage={handleSendMessage} // Передаем функцию обратного вызова
+      />
     </View>
   );
 }
