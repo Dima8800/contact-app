@@ -2,6 +2,7 @@ import { View, Text, Button, StyleSheet, FlatList, SafeAreaView, TouchableOpacit
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import * as Contacts from 'expo-contacts';
+import { Alert } from 'react-native';
 
 import SettingsScreen from './src/SettingsScreen';
 
@@ -90,12 +91,24 @@ const ContactComponent = ({ contacts, savedPhoneNumber }) => {
     toggleModal();
   };
 
+  const alerApp = ()=> {
+    Alert.alert(
+      "Ошибка",
+      "Номер шлюза пуст. \n Укажите его в настройках приложения",
+      [
+        { text: "OK", onPress: () => setIsModalVisible(false) }
+      ],
+      { cancelable: false }
+    );
+  }
+
   const handleSendMessage = (text) => {
     setMessageText(text);
 
     if (savedPhoneNumber === "") {
       console.log("Сохраненный номер телефона пуст.");
       setIsModalVisible(false);
+      alerApp;
       return;
     }
 
@@ -110,6 +123,7 @@ const ContactComponent = ({ contacts, savedPhoneNumber }) => {
   const bell = ()=> {
     if (savedPhoneNumber === "") {
       console.log("Сохраненный номер телефона пуст.");
+      alerApp;
       return;
     }
     const message = `${contacts.phoneNumbers[0].number}#`;
@@ -164,7 +178,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   container: {
-    margin: 20,
     alignItems: "center",
     justifyContent: 'flex-start'
   },
