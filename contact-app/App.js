@@ -1,21 +1,22 @@
-import { View, Text, Button, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Image, Animated, TextInput, ScrollView} from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Image, Animated, TextInput, ScrollView, Linking} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import * as Contacts from 'expo-contacts';
 
 import SettingsScreen from './src/SettingsScreen';
-import messageScreen from './src/MessageScreen';
 
 import phoneImage from './assets/phone.png';
 import messageImage from './assets/message.png';
 import settingsImage from './assets/settings.png';
 import MessageScreen from './src/MessageScreen';
+import { requestPermission } from 'react-native-contacts';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 export default function App() {
   const [contacts, setContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [savedPhoneNumber, setSavedPhoneNumber] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -30,7 +31,7 @@ export default function App() {
   }, []);
 
   const renderContact = ({ item }) => (
-    <ContactComponent contacts={item} />
+    <ContactComponent contacts={item} savedPhoneNumber={savedPhoneNumber} />
   );
 
   const filteredContacts = contacts.filter(contact => {
@@ -39,7 +40,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.body}>
-      <Header/>
+      <Header onSavePhoneNumber={setSavedPhoneNumber} />
       <TextInput
         style={styles.searchInput}
         placeholder="Поиск контактов..."
@@ -55,17 +56,11 @@ export default function App() {
   );
 }
 
-const Header = ({}) => {
+const Header = ({ onSavePhoneNumber }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [savedPhoneNumber, setSavedPhoneNumber] = useState('');
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
-  };
-
-  const handleSavePhoneNumber = (phoneNumber) => {
-    setSavedPhoneNumber(phoneNumber);
-    console.log(savedPhoneNumber);
   };
 
   return (
@@ -74,14 +69,18 @@ const Header = ({}) => {
         <Text style={styles.title}>Контакты</Text>
         <CustomButton onPress={toggleModal} imageSource={settingsImage} />
       </View>
-      <SettingsScreen visible={isModalVisible} onClose={() => setIsModalVisible(false)} onSavePhoneNumber={handleSavePhoneNumber} />
+      <SettingsScreen 
+        visible={isModalVisible} 
+        onClose={() => setIsModalVisible(false)} 
+        onSavePhoneNumber={onSavePhoneNumber} // Передаем функцию в SettingsScreen
+      />
     </View>
   );
 };
 
-const ContactComponent = ({ contacts }) => {
+const ContactComponent = ({ contacts, savedPhoneNumber }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [messageText, setMessageText] = useState(''); // Состояние для хранения текста сообщения
+  const [messageText, setMessageText] = useState('');
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -92,9 +91,34 @@ const ContactComponent = ({ contacts }) => {
   };
 
   const handleSendMessage = (text) => {
-    console.log("Отправленное сообщение:", text); // Логируем отправленное сообщение
-    setMessageText(text); // Обновляем состояние с текстом сообщения
-    toggleModal(); // Закрываем модальное окно
+    setMessageText(text);
+
+    if (savedPhoneNumber === "") {
+      console.log("Сохраненный номер телефона пуст.");
+      setIsModalVisible(false);
+      return;
+    }
+
+    // Формируем сообщение
+    const message = `${contacts.phoneNumbers[0].number}* ${text}`;
+    console.log(`Отправка сообщения на номер: ${savedPhoneNumber}, текст: ${message}`);
+    
+    sendMessage(savedPhoneNumber, message);
+    toggleModal();
+  };
+
+  const bell = ()=> {
+    if (savedPhoneNumber === "") {
+      console.log("Сохраненный номер телефона пуст.");
+      return;
+    }
+    const message = `${contacts.phoneNumbers[0].number}#`;
+    sendMessage(savedPhoneNumber, message);
+  }
+
+  const sendMessage = (phoneNumber, message) => {
+    const url = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`; // Используем обратные кавычки
+    Linking.openURL(url).catch((err) => console.error('Ошибка при открытии приложения сообщений:', err));
   };
 
   return (
@@ -113,14 +137,14 @@ const ContactComponent = ({ contacts }) => {
         {contacts?.phoneNumbers?.length > 0 && (
           <View style={styles.buttonContainer}>
             <CustomButton onPress={handleOpenModal} imageSource={messageImage} />
-            <CustomButton onPress={() => console.log("Button 2 pressed")} imageSource={phoneImage} />
+            <CustomButton onPress={bell} imageSource={phoneImage} />
           </View>
         )}
       </View>
       <MessageScreen 
         visible={isModalVisible} 
         onClose={() => setIsModalVisible(false)}
-        onSendMessage={handleSendMessage} // Передаем функцию обратного вызова
+        onSendMessage={handleSendMessage} 
       />
     </View>
   );
